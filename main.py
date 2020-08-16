@@ -46,13 +46,11 @@ def fill():
         if not (cont == 'Y' or cont == 'y' or cont == ''):
             more_inputs = False
 
-def solve():
-    global sudoku, n_inputs
-    solved = 1
+def get_groups():
+    global sudoku
     h_groups = []
     v_groups = []
 
-    # making groups
     for block in range(3):
         gn = block*3    # group number (0, 3, 6)
         for line in range(3):
@@ -60,27 +58,48 @@ def solve():
             h_groups.append(sudoku[gn][ln:ln+3] + sudoku[gn+1][ln:ln+3] + sudoku[gn+2][ln:ln+3])
             v_groups.append([sudoku[block+rounds*3][line+cell*3] for rounds in range(3) for cell in range(3)])
 
+    return h_groups, v_groups
+
+def get_posibilities(hline, vline, missing, horizontal, vertical):
+    posibilities = []
+
+    for m in missing:
+        if m not in horizontal[hline] and m not in vertical[vline]:
+            posibilities.append(m)
+
+    return posibilities
+
+def solve():
+    global sudoku, n_inputs
+    solved = 1
+    horizontal, vertical = get_groups()
+
     while n_inputs < 81 and solved > 0:
         solved = 0
-        # Horizontal searching
-        for row in range(9):
-            missing = [n for n in range(1, 9) if n not in h_groups[row]]
-            print(f'Row {row}. Missing: {missing}')
-            for cell in range(9):
-                if h_groups[row][cell] == ' ':
-                    for m in missing:
-                        if m not in v_groups[cell]:
-                            print('Found', i)
-                            block = (int)(row/3)*3+(int)(cell/3)
-                            square = (row%3)*3+cell%3
-                            sudoku[block][square] = i
-                            # solved += 1
+        for b, block in enumerate(sudoku):
+            missing = [n for n in range(1, 9+1) if n not in block]
+            for s, square in enumerate(block):
+                if square == ' ':
+                    hline = int(b/3)*3+int(s/3)
+                    vline = (b%3)*3+s%3;
+                    posibilities = get_posibilities(hline, vline, missing, horizontal, vertical)
+
+                    if len(posibilities) == 1:
+                        value = posibilities[0]
+                        missing.remove(value)
+                        sudoku[b][s] = value
+                        horizontal[hline][vline] = value
+                        vertical[vline][hline] = value
+                        n_inputs += 1
+                        solved += 1
+        print('Solved:', solved)
+
   
 sudoku = [[' ' for j in range(9)] for i in range(9)]
 n_inputs = 0
 fill()
 draw(sudoku, message='Your sudoku:')
 print('Numbers:', n_inputs)
+solve()
 draw(sudoku, message='Answer:')
 print('Numbers:', n_inputs)
-solve()
