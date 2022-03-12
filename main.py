@@ -46,6 +46,26 @@ def fill():
         if not (cont == 'Y' or cont == 'y' or cont == ''):
             more_inputs = False
 
+def fill_all():
+    global sudoku, n_inputs
+    print("WARN: Fill in carefully.")
+    for i in range(9):
+        draw(sudoku)
+        #for k in range(9):
+            #print(sudoku[k])
+        row = input(f"Row {i+1} :")
+        for j in range(9):
+            number = row[j]
+            if number != ' ' and number != '':
+                try:
+                    number = int(number)
+                    block = int(i/3)*3+int(j/3)
+                    square = (i%3)*3+(j%3)
+                    sudoku[block][square] = number
+                except:
+                    print("Try again the same row")
+                    j -= 1
+
 def get_groups():
     global sudoku
     h_groups = []
@@ -97,7 +117,10 @@ def solve():
   
 sudoku = [[' ' for j in range(9)] for i in range(9)]
 n_inputs = 0
-fill()
+if(input('Fill per line or per number[1/0]:') == '1'):
+    fill_all()
+else:
+    fill();
 draw(sudoku, message='Your sudoku:')
 print('Numbers:', n_inputs)
 solve()
